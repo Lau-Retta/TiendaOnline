@@ -1,0 +1,6 @@
+C:\Users\lauta\source\repos\TiendaOnline\CapaEntidad\bin\Debug\CapaEntidad.dll
+C:\Users\lauta\source\repos\TiendaOnline\CapaEntidad\bin\Debug\CapaEntidad.pdb
+C:\Users\lauta\source\repos\TiendaOnline\CapaEntidad\obj\Debug\CapaEntidad.csproj.AssemblyReference.cache
+C:\Users\lauta\source\repos\TiendaOnline\CapaEntidad\obj\Debug\CapaEntidad.csproj.CoreCompileInputs.cache
+C:\Users\lauta\source\repos\TiendaOnline\CapaEntidad\obj\Debug\CapaEntidad.dll
+C:\Users\lauta\source\repos\TiendaOnline\CapaEntidad\obj\Debug\CapaEntidad.pdb

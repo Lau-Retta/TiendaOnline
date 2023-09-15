@@ -1,0 +1,286 @@
+﻿ff
+@{
+    ViewBag.Title = "Categorias";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="index.html">Mantenimiento</a></li>
+    <li class="breadcrumb-item active">Categorias</li>
+</ol>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-users me-1"></i>Lista de Categorias
+    </div>
+    <div class="card-body">
+
+        <div class="row">
+            <div class="col-12">
+                <button type="button" class="btn btn-success" onclick="abrirModal(null)">Crear Nuevo</button>
+            </div>
+        </div>
+
+        <hr />
+
+        <table id="tabla" class="display cell-border" style=" width:100%">
+            <thead>
+
+                <tr>
+                    <th>Descripcion</th>
+                    <th>Activo</th>
+                    <th></th>
+
+                </tr>
+
+            </thead>
+            <tbody>
+            </tbody>
+
+        </table>
+
+    </div>
+</div>
+<!--Modal-->                                                                                           <!--El back drop permite dejar estatico al modal si se presiona fuera de él-->
+<div class="modal fade" id="FormModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="exampleModalLabel">Categoria</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row ">
+
+                    <input id="txtid" type="hidden" value="0" />
+                    <div class="row g-1">
+                        <div class="col-sm-6">
+                            <label for="txtDescripcion" class="form-label">Descripcion</label>
+                            <input type="email" class="form-control" id="txtDescripcion" autocomplete="off">
+                        </div>
+
+                        <div class="col-sm-6 ">
+                            <label for="cboActivo" class="form-label">Activo</label>
+                            <select id="cboActivo" class="form-select">
+
+                                <option value="1">Si</option>
+                                <option value="0">No</option>
+
+                            </select>
+                        </div>
+
+                    </div>
+                    <!--Mensaje de alerta-->
+                    <div class="row mt-2">
+                        <div class="col-12">
+
+                            <div id="mensajeError" class="alert alert-danger" role="alert">
+                                A simple danger alert—check it out!
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="Guardar()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script>
+
+        var tablaData;
+        var filaSelect
+
+        //llamamos por id a la tabla y el moto dataTable lo convierte en un jquery.datatable
+        tablaData = $("#tabla").DataTable({
+            responsive: true,
+            ordering: false,
+            "ajax": {
+                url: '@Url.Action("ListarCategorias", "Mantenedor")',
+                type: "GET",
+                dataType: "json"
+            },
+            "columns": [
+                { "data": "Descripcion"},
+                {    // renderizo el valor bool de activo con una funcion que diga dependiendo del valor devulve si o no
+                    "data": "Activo", "render": function (valor) {
+
+                        if (valor) {//utilizo el bange de bootstrap para darle un diseño al resultado
+                            return '<span class="badge bg-success">SI</span>';
+                        }
+                        else {
+                            return '<span class="badge bg-danger">No</span>';
+                        }
+                    }
+                },
+                {
+                    "defaultContent": '<button type="button" class="btn btn-primary btn-editar btn-sm"><i class="fas fa-pen"></i></button>' +
+                        '<button type="button" class="btn btn-danger btn-sm m-2 btn-eliminar"><i class="fas fa-trash" ></i></button>',
+                    "orderable": false, // que no siga ningun orden
+                    "searchable": false, //que no se un resultado de busqueda o cuando busquemos algo no se un elemento que cuente como coincidencia en busqueda,
+                    "width": "90px"
+
+                }
+
+            ],
+            "language": {
+                "url": "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"//se que conecta en linea con el archivo de plugin para traducir la tabla
+            }
+        });
+
+        function abrirModal(json) {
+            //para crear un nuevo usauario
+            $("#txtid").val(0)
+            $("#txtDescripcion").val("");
+            $("#cboActivo").val(1);
+
+            $("#mensajeError").hide();
+
+
+            //para editar un usuario
+            //si el json no es null muestra cierto contenido del mismo
+            if (json != null) {
+                $("#txtid").val(json.IdMarca);
+                $("#txtDescripcion").val(json.Descripcion);
+                $("#cboActivo").val(json.Activo == true ? 1 : 0); //aplicamos una condicional que si es verdad dar 1 sino 0
+            }
+
+            $("#FormModal").modal("show");
+
+        }
+
+        $('#tabla tbody').on('click', '.btn-editar', function () {
+            // almacena la fila selecionadad en filaSelect
+            filaSelect = $(this).closest("tr");
+
+            var Data = tablaData.row(filaSelect).data();//sleccionamos todos los datos del tabla data que conincidan con la fila selecionada
+
+
+            abrirModal(Data);
+
+        })
+
+        $('#tabla tbody').on('click', '.btn-eliminar', function () {
+
+            var MarcaSelect = $(this).closest("tr");
+
+            var data = tablaData.row(MarcaSelect).data();
+
+            swal({
+                title: "¿Estas Seguro?",
+                text: "¿Deseas eliminar la catagoria?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonClass: "btn-danger",
+                confirmButtonText: "Si",
+                cancelButtonText: "No",
+                closeOnConfirm: true
+            },
+                function () {
+
+                    jQuery.ajax({
+                        url: '@Url.Action("Eliminar","Mantenedor")',
+                        type: "POST",
+                        data: JSON.stringify({ id: data.IdCategoria }),
+                        dataType: "json",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            
+                            if (data.resultado) {
+
+                                tablaData.row(CategoriaSelect).remove().draw();
+
+                            }
+                            else {
+                                swal("No se pudo eliminar", data.mensaje, "error")
+                            }
+
+
+                        },
+                        error: function (error) {
+                            $(".modal-body").LoadingOverlay("hide");
+                            console.log(error)
+                        }
+
+
+                    });
+
+                    console.log(data);
+                });
+        });
+
+
+
+
+        function Guardar() {
+                var Categoria = {
+                    IdCategoria: $("#txtid").val(),
+                    Activo: $("#cboActivo").val() == 1 ? true : false,
+                    Descripcion: $("#txtDescripcion").val()
+
+                }
+
+                jQuery.ajax({
+                    url: '@Url.Action("GuardarCategoria", "Mantenedor")',
+                    type: "POST",
+                    data: JSON.stringify({ objeto: Categoria }),
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+
+
+                        if (Categoria.IdCategoria == 0) {
+                            $(".modal-body").LoadingOverlay("hide");
+                            if (data.resultado != 0) {
+                                Categoria.IdCategoria = data.resultado;
+                                //agregamos una nueva fila en el data table
+                                tablaData.row.add(Categoria).draw(false);
+                                $("#FormModal").modal("hide");
+                            }
+                            else {
+
+                                $("#mensajeError").text(data.mensaje);
+                                $("#mensajeError").show();
+                            }
+
+                        }
+                        ///Editar usuario
+                        else {
+                            if (data.resultado) {
+                                tablaData.row(filaSelect).data(Categoria).draw(false);
+                                filaSelect = null;
+                                $("#FormModal").modal("hide");
+                            }
+                            else {
+                                $("#mensajeError").text(data.mensaje);
+                                $("#mensajeError").show();
+                            }
+
+                        }
+                    },
+                    error: function (error) {
+                        $(".modal-body").LoadingOverlay("hide");
+                        console.log(error)
+                    },
+                    beforeSend: function () {
+                        $(".modal-body").LoadingOverlay("show", {
+                            imageResizeFactor: 2,
+                            text: "Cargando...",
+                            size: 14
+                        });
+                    }
+                });
+
+        }
+
+
+    </script>
+
+}
